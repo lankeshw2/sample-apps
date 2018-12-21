@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public class ImageService {
 
     }
 
-    @RequestMapping(value = "/ratings/{imageId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/ratings/average/{imageId}", method = RequestMethod.GET)
     public double getAverageRatingForImage(@PathVariable("imageId") Long imageId) throws IOException {
 
 
@@ -48,11 +49,11 @@ public class ImageService {
     }
 
 
-    @RequestMapping(value = "/ratings/{imageId}/{userId}", method = RequestMethod.POST, consumes = "application/json")
-    public String saveRating(@PathVariable("imageId") Long imageId, @PathVariable("userId") Long userId, ImageRating rating) throws IOException {
+    @RequestMapping(value = "/ratings/submit/{imageId}", method = RequestMethod.POST, consumes = "application/json")
+    public String saveRating(@PathVariable("imageId") Long imageId, @RequestBody ImageRating rating, Principal principal) throws IOException {
 
         rating.setImageId(imageId);
-        rating.setUserId(userId);
+        rating.setUserId(principal.getName());
 
         repository.save(rating);
 
@@ -62,7 +63,7 @@ public class ImageService {
     }
 
 
-    @RequestMapping(value = "/ratings/top", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/ratings/top", method = RequestMethod.GET, produces = "application/json")
     public List<AverageRatingByImage> getTopRatedImages() {
 
 
@@ -78,7 +79,7 @@ public class ImageService {
 
         List<AverageRatingByImage> topRatings = new ArrayList<>();
 
-        imageIdToAverageRatingMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(entry -> {
+        imageIdByAverageRating.entrySet().stream().sorted(Map.Entry.comparingByValue((o1, o2) -> o2.compareTo(o1))).forEach(entry -> {
             AverageRatingByImage image = new AverageRatingByImage();
             image.setImageId(entry.getKey());
             image.setRating(entry.getValue());

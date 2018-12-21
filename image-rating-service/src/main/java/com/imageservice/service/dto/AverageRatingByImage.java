@@ -2,15 +2,15 @@ package com.imageservice.service.dto;
 
 public class AverageRatingByImage {
 
-    int imageId;
+    Long imageId;
 
     double rating;
 
-    public int getImageId() {
+    public Long getImageId() {
         return imageId;
     }
 
-    public void setImageId(int imageId) {
+    public void setImageId(Long imageId) {
         this.imageId = imageId;
     }
 
